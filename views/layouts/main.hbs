@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level up your Gear</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="/stylesheets/stylesheet.css">
+</head>
+<body class="dark-mode">
+  <div class="container w-50 mx-auto my-1">
+    <nav class="navbar bg-body-tertiary">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">
+          {{#if isAuthenticated}} {{ user.name }}
+            Carater
+          {{else}}
+            Level up your Gear
+          {{/if }}
+        </span>
+        {{#if isAuthenticated}}
+          <a href="/users/logout" class="btn btn-outline-danger navbar-btn">登出</a>
+        {{else}}
+          <a href="/users/login" class="btn btn-outline-primary navbar-btn">登入</a>  
+        {{/if}}
+      </div>
+    </nav>
+    {{{ body }}}
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/25a5699dc4.js" crossorigin="anonymous"></script>
+<script type="module" src="/javascripts/log.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const socket = io();
+    const logContainer = document.getElementById('logContainer');
+
+    socket.on('log', (message) => {
+      const logMessage = document.createElement('div');
+      logMessage.textContent = message;
+      logContainer.appendChild(logMessage);
+    });
+  });
+</script>
+</body>
+</html>

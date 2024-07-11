@@ -1,0 +1,64 @@
+<div class="container d-flex flex-column">
+  {{!-- top --}}
+  <div class="row d-flex justify-content-around my-3">
+    {{!-- left half --}}
+    <div class="col-md-5 my-5">
+      <form action="/topup"  method="POST" class="form-group my-2">
+        <label for="top-up">Top up here (0-50000)</label>
+        <input type="number" name="amount" id="top-up"  max="50000" class="form-control my-2" required>
+        <button class="btn btn-outline-info my-2" type="submit">
+          Top up!
+        </button>
+      </form>
+      <div class="my-5">
+        <h3 class="balance align-items-center ">
+          <i class="fa-regular fa-gem"></i> {{ user.currency }}
+        </h3>
+      </div>
+      <div>
+      <div>
+          <h2 class="my-3">
+            Helmet
+            <a href="/gearup/helmet_lv"><i class="fa-solid fa-helmet-safety"></i></a>
+          </h2>
+          <h2 class="my-4">
+            Armor
+            <a href="/gearup/armor_lv"><i class="fa-solid fa-shield-halved"></i></a>
+          </h2>
+          <h2 class="my-3">
+            Weapon
+            <a href="/gearup/weapon_lv"><i class="fa-solid fa-hand-back-fist"></i></a>
+          </h2>
+          <h2 class="my-5">
+            RESET
+            <a href="/gearup/reset"><i class="fa-solid fa-feather-pointed"></i></a>
+          </h2>
+        </div>
+      </div>
+    </div>
+    {{!-- right half --}}
+    <div class="col-md-5 my-5">
+      <div class="relative-container">
+        <div class="puppet">
+        <img src="/image/puppet.png" alt=""
+        style="width: 500px; height: 500px;">
+      </div>
+      <div class="helmet">
+        <img src="/image/helmet_{{ user.helmet_lv }}.png" alt=""
+        style="width: 200px; height: 200px; opacity: 0.9; z-index: 3; position: relative;">
+      </div>
+      <div class="armor">
+        <img src="/image/armor_{{ user.armor_lv }}.png" alt=""
+        style="width: 300px; height: 300px; opacity: 0.9; z-index: 3; position: relative;">
+      </div>
+      <div class="weapon">
+        <img src="/image/weapon_{{ user.weapon_lv }}.png" alt=""
+        style="width: 200px; height: 200px; opacity: 0.9; z-index: 3; position: relative;">
+      </div>
+    </div>
+      </div>
+  </div>
+  {{!-- bottom --}}
+  <div class="my-5" id="logContainer"></div>
+
+</div>

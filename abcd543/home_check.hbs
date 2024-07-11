@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const socket = io();
+      const logContainer = document.getElementById('logContainer');
+
+      socket.on('log', (message) => {
+        const logMessage = document.createElement('div');
+        logMessage.textContent = message;
+        logContainer.appendChild(logMessage);
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <!-- Other content -->
+    {{!-- bottom --}}
+    <div class="my-5" id="logContainer"></div>
+  </div>
+</body>
+</html>
