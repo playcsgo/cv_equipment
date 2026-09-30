@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'app-instance',
       script: './app.js',
-      instances: '2',
+      instances: Number(process.env.WEB_INSTANCES || 1),
       autorestart: true,
       exec_mode: 'cluster',
       max_memory_restart: '1G',

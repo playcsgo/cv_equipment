@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: gear-demo
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: gear-demo-sessions
+          property: connectionString
+      - key: MONGODB_URI
+        sync: false
+      - key: CLOUDAMQP_URL
+        sync: false
+  - type: keyvalue
+    name: gear-demo-sessions
+    plan: free
+    region: singapore
+    ipAllowList: []

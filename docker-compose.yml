@@ -1,0 +1,10 @@
+services:
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ["5672:5672", "15672:15672"]
