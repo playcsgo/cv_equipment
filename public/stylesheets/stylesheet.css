@@ -196,3 +196,115 @@ body.dark-mode #logContainer {
   border-color: #333333;
 }
 /* dark mode end */
+
+/* gear upgrade buttons */
+.gear-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.gear-hint {
+  color: #f0c36d;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.gear-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #f0c36d;
+  border-radius: 0.6rem;
+  background-color: #2a2418;
+  color: #fff8e1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.gear-btn:hover,
+.gear-btn:focus-visible {
+  color: #fff8e1;
+  background-color: #3d3220;
+  box-shadow: 0 0 0 3px rgba(240, 195, 109, 0.35);
+  transform: translateY(-2px);
+}
+
+.gear-btn:active {
+  transform: translateY(0);
+}
+
+.gear-icon {
+  font-size: 1.6rem;
+  width: 2rem;
+  text-align: center;
+}
+
+.gear-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.gear-name small {
+  font-size: 0.85rem;
+  font-weight: 400;
+  display: block;
+  color: #bfb49a;
+}
+
+.gear-action {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background-color: #f0c36d;
+  color: #1e1e1e;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.gear-btn.is-disabled {
+  cursor: not-allowed;
+  border-color: #444;
+  background-color: #242424;
+  color: #888;
+  box-shadow: none;
+  transform: none;
+}
+
+.gear-btn.is-disabled .gear-action {
+  background-color: #444;
+  color: #aaa;
+}
+
+.gear-btn-reset {
+  margin-top: 1rem;
+  border-style: dashed;
+  border-color: #777;
+  background-color: transparent;
+}
+
+.gear-btn-reset .gear-action {
+  background-color: #555;
+  color: #eee;
+}
+/* gear upgrade buttons end */
+
+.btn-topup {
+  background-color: #f0c36d;
+  border-color: #f0c36d;
+  color: #1e1e1e;
+  font-weight: 600;
+}
+
+.btn-topup:hover,
+.btn-topup:focus-visible {
+  background-color: #ffd98a;
+  border-color: #ffd98a;
+  color: #1e1e1e;
+}

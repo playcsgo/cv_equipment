@@ -1,0 +1,19 @@
+{{#if (gte lv 4)}}
+  <span class="gear-btn is-disabled" aria-disabled="true">
+    <i class="fa-solid {{ icon }} gear-icon"></i>
+    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
+    <span class="gear-action">MAX</span>
+  </span>
+{{else if (lt currency 500)}}
+  <span class="gear-btn is-disabled" aria-disabled="true" title="Not enough gems — top up first">
+    <i class="fa-solid {{ icon }} gear-icon"></i>
+    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
+    <span class="gear-action">💎 not enough</span>
+  </span>
+{{else}}
+  <a href="/gearup/{{ slot }}" class="gear-btn">
+    <i class="fa-solid {{ icon }} gear-icon"></i>
+    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
+    <span class="gear-action"><i class="fa-solid fa-arrow-up"></i> 💎500</span>
+  </a>
+{{/if}}
