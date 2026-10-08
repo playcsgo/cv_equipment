@@ -14,21 +14,24 @@ db.once('open', () => {
   console.log('mongoDB connected.')
 })
 
+const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const processTopUp = (msg) => {
-  const { userId, amount } = JSON.parse(msg.content.toString());
-  console.log('userId:', userId);
-  console.log('amount:', amount);
-  
-  User.findById(userId)
-    .then(user => {
+  const { userId, amount } = JSON.parse(msg.content.toString())
+  console.log('userId:', userId)
+  console.log('amount:', amount)
+
+  sleep(WORKER_DELAY_MS)
+    .then(() => User.findById(userId))
+    .then((user) => {
       user.currency += amount
       user.save()
     })
     .then(() => console.log(`${amount} top up completed`))
-    .catch(err => console.error(err))
+    .catch((err) => console.error(err))
 
   // msg.channel.ack(msg);
-};
+}
 
-consumeQueue('paymentQueue', processTopUp);
+consumeQueue('paymentQueue', processTopUp)

@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm ci
-    startCommand: npm start
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: pnpm start
     envVars:
       - key: NODE_ENV
         value: production

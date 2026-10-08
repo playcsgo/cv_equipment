@@ -15,5 +15,7 @@ node_modules
 
 # dotenv
 .env
+.env.*
+!.env.example
 
 # browser-sync start --proxy "localhost:3000" --files "./**/**/**"

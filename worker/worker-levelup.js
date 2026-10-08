@@ -1,4 +1,4 @@
-const { consumeQueue } = require('../que/queue');
+const { consumeQueue } = require('../que/queue')
 const User = require('../models/user')
 
 // connect MongoDB
@@ -14,40 +14,41 @@ db.once('open', () => {
   console.log('mongoDB connected.')
 })
 
+const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const processLevelUp = (msg) => {
-  const { userId, location, maxLevel } = JSON.parse(msg.content.toString());
+  const { userId, location, maxLevel } = JSON.parse(msg.content.toString())
   // gearUp Here!!
   console.log('userId:', userId)
   console.log('location:', location)
   console.log('maxLevel:', maxLevel)
 
-  User.findById(userId)
-      .then(user => {
-        switch(location) {
-            case 'reset':
-              user.helmet_lv = 1
-              user.armor_lv = 1
-              user.weapon_lv = 1
-              break
+  sleep(WORKER_DELAY_MS)
+    .then(() => User.findById(userId))
+    .then((user) => {
+      switch (location) {
+        case 'reset':
+          user.helmet_lv = 1
+          user.armor_lv = 1
+          user.weapon_lv = 1
+          break
 
-            default:
-              if (user[location] < maxLevel &&
-                user.currency >= 500 ) {
-                user[location]++
-                user.currency -= 500
-              } else {
-                console.log(`${location} over Lv_4`)
-              }
-              break
+        default:
+          if (user[location] < maxLevel && user.currency >= 500) {
+            user[location]++
+            user.currency -= 500
+          } else {
+            console.log(`${location} over Lv_4`)
           }
-        user.save()
-      })
-      .then(() => console.log('gearUp completed'))
-      .catch(err => console.error(err))
-};
-
+          break
+      }
+      user.save()
+    })
+    .then(() => console.log('gearUp completed'))
+    .catch((err) => console.error(err))
+}
 
 // consume = subscription
 // sub 'levelupQueue', and conduct call back 'processLevelUp'
-consumeQueue('levelupQueue', processLevelUp);
+consumeQueue('levelupQueue', processLevelUp)

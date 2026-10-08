@@ -6,6 +6,13 @@
   "scripts": {
     "start": "pm2-runtime ecosystem.config.js",
     "dev": "nodemon app.js",
+    "worker:payment": "node worker/worker-payment.js",
+    "worker:levelup": "node worker/worker-levelup.js",
+    "repro:race": "node scripts/race-topup.js",
+    "repro:mixed": "node scripts/race-mixed.js",
+    "repro:duplicate": "node scripts/duplicate-topup.js",
+    "repro:crash": "node scripts/crash-topup.js",
+    "repro:poison": "node scripts/poison.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,6 +21,7 @@
   "engines": {
     "node": ">=20"
   },
+  "packageManager": "pnpm@12.5.1",
   "dependencies": {
     "amqplib": "^0.10.9",
     "bcryptjs": "^2.4.3",
@@ -33,5 +41,8 @@
     "pm2": "^5.4.2",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
