@@ -1,31 +1,54 @@
 const amqp = require('amqplib')
 
-let connection = null
-let channel = null
+let channelPromise = null
 
-const connectRabbitMQ = async () => {
-  if (!connection) {
-    connection = await amqp.connect(
-      process.env.CLOUDAMQP_URL || 'amqp://localhost',
-    )
-  }
-  if (!channel) {
-    channel = await connection.createChannel()
-  }
-  return { connection, channel }
-}
+const connect = async () => {
+  const connection = await amqp.connect(
+    process.env.CLOUDAMQP_URL || 'amqp://localhost',
+  )
+  connection.on('error', (err) =>
+    console.error('[rabbitmq] connecting failed', err.message),
+  )
+  connection.on('close', () => {
+    console.error('[rabbitmq] 連線中斷')
+    channelPromise = null
+  })
 
-const getChannel = async () => {
-  if (!channel) {
-    await connectRabbitMQ()
-  }
+  const channel = await connection.createConfirmChannel()
+  channel.on('error', (err) =>
+    console.error('[rabbitmq] channel 錯誤：', err.message),
+  )
+  channel.on('close', () => {
+    channelPromise = null
+  })
+
   return channel
 }
 
-const sendToQueue = async (queueName, message) => {
+const getChannel = async () => {
+  if (!channelPromise) {
+    channelPromise = connect().catch((err) => {
+      channelPromise = null
+      throw err
+    })
+  }
+  return channelPromise
+}
+
+// durable: true only make sure queue exist
+// persistent: msg store in drive , make sure message in queue exist
+
+const sendToQueue = async (queueName, message, { messageId } = {}) => {
   const channel = await getChannel()
   await channel.assertQueue(queueName, { durable: true })
-  channel.sendToQueue(queueName, Buffer.from(message))
+  await new Promise((resovle, reject) => {
+    channel.sendToQueue(
+      queueName,
+      Buffer.from(message),
+      { persistent: true, messageId },
+      (err) => (err ? reject(err) : resovle()),
+    )
+  })
 }
 
 // .consume is subscription
@@ -33,6 +56,11 @@ const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
   const channel = await getChannel()
   await channel.assertQueue(queueName, { durable: true })
   await channel.prefetch(prefetch)
+
+  channel.on('close', () => {
+    console.error(`[${queueName}] consumer 連線中斷，結束程序等待重啟`)
+    process.exit(1)
+  })
   await channel.consume(
     queueName,
     async (msg) => {

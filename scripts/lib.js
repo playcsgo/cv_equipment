@@ -14,29 +14,35 @@ async function newGuest() {
   return cookie
 }
 
+// RPC should go with a timeout, not hold the process
+async function request(path, options) {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10_000),
+      ...options,
+    })
+    return res.status
+  } catch (err) {
+    if (err.name === 'TimeoutError') return 'timeout'
+    throw err
+  }
+}
+
 function postForm(cookie, path, fields) {
-  return fetch(`${BASE}${path}`, {
+  return request(path, {
     method: 'POST',
-    redirect: 'manual',
     headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(fields),
   })
 }
 
-async function topup(cookie, amount, topupId = crypto.randomUUID()) {
-  const res = await postForm(cookie, '/topup', {
-    amount: String(amount),
-    topupId,
-  })
-  return res.status
+function topup(cookie, amount, topupId = crypto.randomUUID()) {
+  return postForm(cookie, '/topup/', { amount: String(amount), topupId })
 }
 
-async function gearup(cookie, slot) {
-  const res = await fetch(`${BASE}/gearup/${slot}`, {
-    redirect: 'manual', // required ?
-    headers: { cookie },
-  })
-  return res.status
+function gearup(cookie, slot) {
+  return request(`/gearup/${slot}`, { headers: { cookie } })
 }
 
 async function readState(cookie) {

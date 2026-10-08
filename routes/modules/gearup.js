@@ -26,7 +26,11 @@ router.get('/:location', (req, res) => {
         res.redirect('/')
       }, 300)
     })
-    .catch((err) => console.error('[gearup.js]', err))
+    .catch((err) => {
+      console.error('[gearup.js], err')
+      req.flash('warning_msg', 'system busy, please try later')
+      res.redirect('/')
+    })
 
   // User.findById(userId)
   //     .then(user => {
