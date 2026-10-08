@@ -22,44 +22,38 @@ const MAX_LEVEL = 4
 const LEVEL_UP_COST = 500
 const SLOTS = ['helmet_lv', 'armor_lv', 'weapon_lv']
 
-const processLevelUp = async (msg) => {
-  const { userId, location } = JSON.parse(msg.content.toString())
-
+const processLevelUp = async ({ userId, location }) => {
   await sleep(WORKER_DELAY_MS)
 
-  try {
-    if (location === 'reset') {
-      await User.updateOne(
-        { _id: userId },
-        { $set: { helmet_lv: 1, armor_lv: 1, weapon_lv: 1 } },
-      )
-      console.log(`[level up] ${userId} reset`)
-      return
-    }
-    if (!SLOTS.includes(location)) {
-      console.warn(`[levelup] unknown slot: ${location}`)
-      return
-    }
-
-    // atomictly - in DB, not in JS
-    const result = await User.updateOne(
-      {
-        _id: userId,
-        currency: { $gte: LEVEL_UP_COST },
-        [location]: { $lt: MAX_LEVEL },
-      },
-      { $inc: { currency: -LEVEL_UP_COST, [location]: 1 } },
+  if (location === 'reset') {
+    await User.updateOne(
+      { _id: userId },
+      { $set: { helmet_lv: 1, armor_lv: 1, weapon_lv: 1 } },
     )
+    console.log(`[levelup] ${userId} reset`)
+    return
+  }
 
-    if (result.modifiedCount === 0) {
-      console.log(
-        `[levelup] ${userId} ${location}: 餘額不足、已達 Lv ${MAX_LEVEL}，或使用者不存在`,
-      )
-    } else {
-      console.log(`[levelup] ${userId} ${location} +1`)
-    }
-  } catch (err) {
-    console.error('[levelup] failed', err)
+  if (!SLOTS.includes(location)) {
+    console.warn(`[levelup] unknown slot: ${location}`)
+    return
+  }
+
+  const result = await User.updateOne(
+    {
+      _id: userId,
+      currency: { $gte: LEVEL_UP_COST },
+      [location]: { $lt: MAX_LEVEL },
+    },
+    { $inc: { currency: -LEVEL_UP_COST, [location]: 1 } },
+  )
+
+  if (result.modifiedCount === 0) {
+    console.log(
+      `[levelup] ${userId} ${location}: 餘額不足、已達 Lv ${MAX_LEVEL}，或使用者不存在`,
+    )
+  } else {
+    console.log(`[levelup] ${userId} ${location} +1`)
   }
 }
 

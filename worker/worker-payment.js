@@ -17,23 +17,19 @@ db.once('open', () => {
 const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const processTopUp = async (msg) => {
-  const { userId, amount } = JSON.parse(msg.content.toString())
-
+// 只處理 payload：JSON.parse 與 ack / nack 由 consumeQueue 負責
+// 不要在這裡 catch，錯誤丟出去 consumeQueue 才會 nack
+const processTopUp = async ({ userId, amount }) => {
   await sleep(WORKER_DELAY_MS)
 
-  try {
-    const result = await User.updateOne(
-      { _id: userId },
-      { $inc: { currency: amount } },
-    )
-    if (result.matchedCount === 0) {
-      console.warn(`[topup] user ${userId} not found`)
-    } else {
-      console.log(`[topup] ${userId} +${amount}`)
-    }
-  } catch (err) {
-    console.error('[topup] failed', err)
+  const result = await User.updateOne(
+    { _id: userId },
+    { $inc: { currency: amount } },
+  )
+  if (result.matchedCount === 0) {
+    console.warn(`[topup] user ${userId} not found`)
+  } else {
+    console.log(`[topup] ${userId} +${amount}`)
   }
 }
 
