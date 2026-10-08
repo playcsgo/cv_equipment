@@ -19,13 +19,16 @@ RabbitMQ 管理介面：http://localhost:15672（guest / guest），Queues 頁�
 
 | 指令 | 重現什麼 |
 |---|---|
-| `pnpm run repro:race` | 同一個帳號同時儲值 50 筆 × 100（可用 `-- <筆數>` 調整） |
+| `pnpm run repro:race` | 同一個帳號同時儲值 50 筆 × 100（可用 `pnpm run repro:race 200` 調整筆數） |
 | `pnpm run repro:mixed` | 同時儲值 20 筆，並升級三件裝備（兩個 worker 同時改同一位使用者） |
 | `pnpm run repro:duplicate` | 同一個 topupId 送兩次（處理完之後再重送，不是同時送） |
 | `pnpm run repro:crash` | payment worker 處理到一半當掉（worker 要用 `WORKER_DELAY_MS=3000` 啟動，看到提示後 3 秒內 Ctrl+C 再重啟；`WAIT_MS` 調整等待時間） |
 | `pnpm run repro:poison` | 壞訊息（`"not json"`）進到 paymentQueue，之後的正常儲值還會不會入帳 |
 
 所有腳本結果是 ❌ 時以 exit code 1 結束。
+
+一次跑完：`pnpm run repro:all --tag E1`（race、mixed、duplicate、poison；crash 要手動，另外跑）。
+會先檢查 web 和兩個 worker 有沒有在跑，結果同時寫進 `scripts/logs/<時間>_<tag>.log`（不進 git）。
 
 ## 結果紀錄
 

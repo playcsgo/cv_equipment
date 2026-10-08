@@ -13,6 +13,7 @@
     "repro:duplicate": "node scripts/duplicate-topup.js",
     "repro:crash": "node scripts/crash-topup.js",
     "repro:poison": "node scripts/poison.js",
+    "repro:all": "node scripts/run-all.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

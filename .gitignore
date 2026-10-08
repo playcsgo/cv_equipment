@@ -19,3 +19,5 @@ node_modules
 !.env.example
 
 # browser-sync start --proxy "localhost:3000" --files "./**/**/**"
+# 重現腳本的 log
+scripts/logs/
