@@ -4,8 +4,9 @@
     {{!-- left half --}}
     <div class="col-md-5 my-5">
       <form action="/topup"  method="POST" class="form-group my-2">
-        <label for="top-up">Top up here (0-50000)</label>
-        <input type="number" name="amount" id="top-up"  max="50000" class="form-control my-2" required>
+        <label for="top-up">Top up here (1-50000)</label>
+        <input type="number" name="amount" id="top-up" min="1" max="50000" step="1" class="form-control my-2" required>
+        <input type="hidden" name="topupId" value="{{ topupId }}">
         <button class="btn btn-topup my-2" type="submit">
           Top up!
         </button>
