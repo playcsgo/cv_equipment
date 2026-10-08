@@ -17,36 +17,50 @@ db.once('open', () => {
 const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const processLevelUp = (msg) => {
-  const { userId, location, maxLevel } = JSON.parse(msg.content.toString())
-  // gearUp Here!!
-  console.log('userId:', userId)
-  console.log('location:', location)
-  console.log('maxLevel:', maxLevel)
+// business logic
+const MAX_LEVEL = 4
+const LEVEL_UP_COST = 500
+const SLOTS = ['helmet_lv', 'armor_lv', 'weapon_lv']
 
-  sleep(WORKER_DELAY_MS)
-    .then(() => User.findById(userId))
-    .then((user) => {
-      switch (location) {
-        case 'reset':
-          user.helmet_lv = 1
-          user.armor_lv = 1
-          user.weapon_lv = 1
-          break
+const processLevelUp = async (msg) => {
+  const { userId, location } = JSON.parse(msg.content.toString())
 
-        default:
-          if (user[location] < maxLevel && user.currency >= 500) {
-            user[location]++
-            user.currency -= 500
-          } else {
-            console.log(`${location} over Lv_4`)
-          }
-          break
-      }
-      user.save()
-    })
-    .then(() => console.log('gearUp completed'))
-    .catch((err) => console.error(err))
+  await sleep(WORKER_DELAY_MS)
+
+  try {
+    if (location === 'reset') {
+      await User.updateOne(
+        { _id: userId },
+        { $set: { helmet_lv: 1, armor_lv: 1, weapon_lv: 1 } },
+      )
+      console.log(`[level up] ${userId} reset`)
+      return
+    }
+    if (!SLOTS.includes(location)) {
+      console.warn(`[levelup] unknown slot: ${location}`)
+      return
+    }
+
+    // atomictly - in DB, not in JS
+    const result = await User.updateOne(
+      {
+        _id: userId,
+        currency: { $gte: LEVEL_UP_COST },
+        [location]: { $lt: MAX_LEVEL },
+      },
+      { $inc: { currency: -LEVEL_UP_COST, [location]: 1 } },
+    )
+
+    if (result.modifiedCount === 0) {
+      console.log(
+        `[levelup] ${userId} ${location}: 餘額不足、已達 Lv ${MAX_LEVEL}，或使用者不存在`,
+      )
+    } else {
+      console.log(`[levelup] ${userId} ${location} +1`)
+    }
+  } catch (err) {
+    console.error('[levelup] failed', err)
+  }
 }
 
 // consume = subscription

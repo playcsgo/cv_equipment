@@ -5,29 +5,28 @@ const User = require('../../models/user')
 // RabbitMQ
 const { sendToQueue } = require('../../que/queue')
 
-const maxLevel = 4
-
-
 router.get('/:location', (req, res) => {
   const userId = req.user?._id
   const location = req.params.location
-  if (location !== 'reset' &&
-      location !== 'helmet_lv' &&
-      location !== 'armor_lv' &&
-      location !== 'weapon_lv') {
-        req.flash('warning_msg', '無此選項')
-        return res.redirect('/')
-      }
-  
-  const msg = JSON.stringify({ userId, location, maxLevel })
+  if (
+    location !== 'reset' &&
+    location !== 'helmet_lv' &&
+    location !== 'armor_lv' &&
+    location !== 'weapon_lv'
+  ) {
+    req.flash('warning_msg', '無此選項')
+    return res.redirect('/')
+  }
+
+  const msg = JSON.stringify({ userId, location })
   sendToQueue('levelupQueue', msg)
-      .then(() => {
-        console.log('task send to levelupQueue')
-        setTimeout(() => {
-          res.redirect('/')
-        }, 300)
-      })
-      .catch(err => console.error('[gearup.js]', err))
+    .then(() => {
+      console.log('task send to levelupQueue')
+      setTimeout(() => {
+        res.redirect('/')
+      }, 300)
+    })
+    .catch((err) => console.error('[gearup.js]', err))
 
   // User.findById(userId)
   //     .then(user => {
