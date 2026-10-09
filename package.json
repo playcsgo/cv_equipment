@@ -18,6 +18,7 @@
     "repro:chaos": "node scripts/run-chaos.js",
     "repro:invalid": "node scripts/invalid-amount.js",
     "dlq:replay": "node scripts/dlq-replay.js",
+    "repro:latency": "node scripts/latency.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

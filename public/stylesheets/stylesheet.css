@@ -308,3 +308,9 @@ body.dark-mode #logContainer {
   border-color: #ffd98a;
   color: #1e1e1e;
 }
+
+.pending-note {
+  color: #ffc107;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}

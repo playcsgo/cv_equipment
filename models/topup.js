@@ -13,4 +13,6 @@ const topupSchema = new Schema(
   { versionKey: false },
 )
 
+topupSchema.index({ userId: 1, status: 1 })
+
 module.exports = mongoose.model('eq_topup', topupSchema)

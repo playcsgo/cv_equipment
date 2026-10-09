@@ -15,6 +15,16 @@
         <h3 class="balance align-items-center ">
           <i class="fa-regular fa-gem"></i> {{ user.currency }}
         </h3>
+        {{#if pendingTopups.length}}
+          <p class="pending-note" data-pending-topups="{{ pendingTopupIds }}">
+            <i class="fa-solid fa-spinner fa-spin"></i> 儲值處理中：{{#each pendingTopups}}+{{ this.amount }} {{/each}}
+          </p>
+        {{/if}}
+        {{#if awaitingGear}}
+          <p class="pending-note" data-awaiting-gear="{{ awaitingGear }}">
+            <i class="fa-solid fa-spinner fa-spin"></i> 升級處理中…
+          </p>
+        {{/if}}
       </div>
       <div class="gear-panel">
         <p class="gear-hint">
@@ -55,5 +65,37 @@
   </div>
   {{!-- bottom --}}
   <div class="my-5" id="logContainer"></div>
-
 </div>
+
+<script>
+  (() => {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+    const getJSON = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+
+    // 儲值：每 0.5 秒查一次每筆儲值的狀態，全部 done 就重新整理（最多等 60 秒）
+    const topupEl = document.querySelector('[data-pending-topups]')
+    if (topupEl) {
+      const ids = topupEl.dataset.pendingTopups.split(' ').filter(Boolean)
+      ;(async () => {
+        for (let i = 0; i < 120; i++) {
+          await sleep(500)
+          const results = await Promise.all(ids.map((id) => getJSON(`/topup/${id}`)))
+          if (results.every((r) => r && r.status === 'done')) return location.reload()
+        }
+      })()
+    }
+
+    const gearEl = document.querySelector('[data-awaiting-gear]')
+    if (gearEl) {
+      const before = gearEl.dataset.awaitingGear
+      ;(async () => {
+        for (let i = 0; i < 10; i++) {
+          await sleep(500)
+          const s = await getJSON('/state')
+          if (s && `${s.currency}-${s.helmet_lv}-${s.armor_lv}-${s.weapon_lv}` !== before) break
+        }
+        location.replace('/')
+      })()
+    }
+  })()
+</script>
