@@ -15,7 +15,9 @@
     "repro:poison": "node scripts/poison.js",
     "repro:broker-restart": "node scripts/broker-restart.js",
     "repro:all": "node scripts/run-all.js",
+    "repro:chaos": "node scripts/run-chaos.js",
     "repro:invalid": "node scripts/invalid-amount.js",
+    "dlq:replay": "node scripts/dlq-replay.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

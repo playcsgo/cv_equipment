@@ -16,6 +16,7 @@ const SCRIPTS = {
   race: 'race-topup.js',
   mixed: 'race-mixed.js',
   duplicate: 'duplicate-topup.js',
+  invalid: 'invalid-amount.js',
   poison: 'poison.js',
 }
 

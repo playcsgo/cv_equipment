@@ -1,4 +1,4 @@
-const { consumeQueue } = require('../que/queue')
+const { consumeQueue, PermanentError } = require('../que/queue')
 const User = require('../models/user')
 const Topup = require('../models/topup')
 
@@ -22,6 +22,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 // 不要在這裡 catch，錯誤丟出去 consumeQueue 才會 nack
 // topup and user currency sould be handle at once with transaction
 const processTopUp = async ({ topupId }) => {
+  if (typeof topupId !== 'string')
+    throw new PermanentError('topupId 必須是字串')
   await sleep(WORKER_DELAY_MS)
 
   const session = await mongoose.startSession()

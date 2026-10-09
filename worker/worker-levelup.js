@@ -1,4 +1,4 @@
-const { consumeQueue } = require('../que/queue')
+const { consumeQueue, PermanentError } = require('../que/queue')
 const User = require('../models/user')
 
 // connect MongoDB
@@ -23,6 +23,10 @@ const LEVEL_UP_COST = 500
 const SLOTS = ['helmet_lv', 'armor_lv', 'weapon_lv']
 
 const processLevelUp = async ({ userId, location }) => {
+  if (typeof userId !== 'string') throw new PermanentError('userId 必須是字串')
+  if (location !== 'reset' && !SLOTS.includes(location)) {
+    throw new PermanentError(`unknown slot: ${location}`)
+  }
   await sleep(WORKER_DELAY_MS)
 
   if (location === 'reset') {

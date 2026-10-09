@@ -8,7 +8,7 @@ const INVALID = ['-5000', '0', '1.5', '50001', 'abc', '']
   const cookie = await newGuest()
   const before = await readState(cookie)
 
-  for (amount of INVALID) {
+  for (const amount of INVALID) {
     await postForm(cookie, '/topup', { amount, topupId: crypto.randomUUID() })
   }
 
