@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const User = require('../../models/user')
 const Topup = require('../../models/topup')
 
 // RabbitMQ
@@ -45,14 +44,22 @@ router.post('/', async (req, res) => {
     await enqueue('paymentQueue', JSON.stringify({ topupId: topup._id }), {
       messageId: topup._id,
     })
-    await new Promise((r) => {
-      setTimeout(r, 300)
-    }) // to show update currency, temp solution, will remove later refacotr
+    // 送進 queue 就馬上回應；首頁會顯示「儲值處理中」並輪詢 GET /topup/:id
     res.redirect('/')
   } catch (err) {
     console.error('[topup.js]', err)
     fail(req, res, 'system busy, please try later')
   }
+})
+
+// 儲值處理狀態（首頁輪詢用）。不是自己的儲值一律 404，不透露它存在
+router.get('/:id', async (req, res) => {
+  const topup = await Topup.findOne(
+    { _id: req.params.id, userId: req.user._id },
+    'status',
+  ).lean()
+  if (!topup) return res.status(404).json({ error: 'not_found' })
+  res.json({ status: topup.status })
 })
 
 module.exports = router

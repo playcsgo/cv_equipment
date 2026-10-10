@@ -21,3 +21,6 @@ node_modules
 # browser-sync start --proxy "localhost:3000" --files "./**/**/**"
 # 重現腳本的 log
 scripts/logs/
+
+# Redis 本機資料快照
+dump.rdb
