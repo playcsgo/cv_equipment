@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 // RabbitMQ
-const { sendToQueue } = require('../../que/queue')
+const { enqueue } = require('../../que/queue')
 
 const LOCATIONS = ['reset', 'helmet_lv', 'armor_lv', 'weapon_lv']
 
@@ -13,7 +13,7 @@ router.get('/:location', async (req, res) => {
     return res.redirect('/')
   }
   try {
-    await sendToQueue(
+    await enqueue(
       'levelupQueue',
       JSON.stringify({ userId: user._id, location }),
     )

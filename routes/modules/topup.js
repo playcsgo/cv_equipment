@@ -4,7 +4,7 @@ const User = require('../../models/user')
 const Topup = require('../../models/topup')
 
 // RabbitMQ
-const { sendToQueue } = require('../../que/queue')
+const { enqueue } = require('../../que/queue')
 
 const MAX_TOPUP = 50000
 const UUID_RE =
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
         return fail(req, res, 'duplicate topup action')
       }
     }
-    await sendToQueue('paymentQueue', JSON.stringify({ topupId: topup._id }), {
+    await enqueue('paymentQueue', JSON.stringify({ topupId: topup._id }), {
       messageId: topup._id,
     })
     await new Promise((r) => {

@@ -41,7 +41,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 class PermanentError extends Error {}
 
-const assertWorkQueue = async (channel, queueName) => {
+const declareWorkQueue = async (channel, queueName) => {
   await channel.assertQueue(`${queueName}.dlq`, { durable: true })
   await channel.assertQueue(queueName, {
     durable: true,
@@ -53,7 +53,12 @@ const assertWorkQueue = async (channel, queueName) => {
 // durable: true only make sure queue exist
 // persistent: msg store in drive , make sure message in queue exist
 
-const publish = (channel, queueName, content, { messageId, headers } = {}) =>
+const publishWithConfirm = (
+  channel,
+  queueName,
+  content,
+  { messageId, headers } = {},
+) =>
   new Promise((resolve, reject) => {
     channel.sendToQueue(
       queueName,
@@ -63,17 +68,23 @@ const publish = (channel, queueName, content, { messageId, headers } = {}) =>
     )
   })
 
-const sendToQueue = async (queueName, message, { messageId } = {}) => {
+const enqueue = async (queueName, message, { messageId } = {}) => {
   const channel = await getChannel()
-  await assertWorkQueue(channel, queueName)
-  await publish(channel, queueName, Buffer.from(message), { messageId })
+  await declareWorkQueue(channel, queueName)
+  await publishWithConfirm(channel, queueName, Buffer.from(message), {
+    messageId,
+  })
 }
 
 // .consume is subscription
 const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
   const channel = await getChannel()
-  await assertWorkQueue(channel, queueName)
+  await declareWorkQueue(channel, queueName)
   await channel.prefetch(prefetch)
+
+  // nack(msg, allUpTo, requeue)：不放回 → 有 DLX 設定，自動進 DLQ；放回 → 回到 queue 再處理
+  const toDlq = (msg) => channel.nack(msg, false, false)
+  const putBack = (msg) => channel.nack(msg, false, true)
 
   channel.on('close', () => {
     console.error(`[${queueName}] consumer 連線中斷，結束程序等待重啟`)
@@ -90,7 +101,7 @@ const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
         `[${queueName}] 訊息格式錯誤，送進 DLQ：`,
         msg.content.toString(),
       )
-      channel.nack(msg, false, false)
+      toDlq(msg)
       return
     }
 
@@ -99,33 +110,33 @@ const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
       channel.ack(msg)
     } catch (err) {
       const headers = msg.properties.headers || {}
-      const attmpts = (headers['x-attempts'] || 0) + 1
-      if (err instanceof PermanentError || attmpts >= MAX_ATTEMPTS) {
+      const attempts = (headers['x-attempts'] || 0) + 1
+      if (err instanceof PermanentError || attempts >= MAX_ATTEMPTS) {
         console.error(
-          `[${queueName}] failed ${attmpts} times. send it to DLQ:`,
+          `[${queueName}] failed ${attempts} times. send it to DLQ:`,
           err.message,
         )
-        channel.nack(msg, false, false)
+        toDlq(msg)
         return
       }
-      const delay = RETRY_BASE_MS * 2 ** (attmpts - 1)
+      const delay = RETRY_BASE_MS * 2 ** (attempts - 1)
       console.warn(
-        `[${queueName}] failed ${attmpts} times, retry after ${delay / 1_000}s...`,
+        `[${queueName}] failed ${attempts} times, retry after ${delay / 1_000}s...`,
         err.message,
       )
       await sleep(delay)
 
       try {
-        await publish(channel, queueName, msg.content, {
+        await publishWithConfirm(channel, queueName, msg.content, {
           messageId: msg.properties.messageId,
-          headers: { ...headers, 'x-attempts': attmpts },
+          headers: { ...headers, 'x-attempts': attempts },
         })
         channel.ack(msg)
       } catch {
-        channel.nack(msg, false, true)
+        putBack(msg)
       }
     }
   })
 }
 
-module.exports = { sendToQueue, consumeQueue, PermanentError }
+module.exports = { enqueue, consumeQueue, PermanentError }
