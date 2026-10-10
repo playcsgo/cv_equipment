@@ -2,15 +2,20 @@ const amqp = require('amqplib')
 
 let channelPromise = null
 
+let currentConnection = null
+let shuttingDown = false
+
 const connect = async () => {
   const connection = await amqp.connect(
     process.env.CLOUDAMQP_URL || 'amqp://localhost',
   )
+  currentConnection = connection
   connection.on('error', (err) =>
     console.error('[rabbitmq] connecting failed', err.message),
   )
   connection.on('close', () => {
-    console.error('[rabbitmq] 連線中斷')
+    if (!shuttingDown) console.error('[rabbitmq] 連線中斷')
+    if (currentConnection === connection) currentConnection = null
     channelPromise = null
   })
 
@@ -76,8 +81,8 @@ const enqueue = async (queueName, message, { messageId } = {}) => {
   })
 }
 
-// .consume is subscription
-const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
+// 啟動一個 consumer（訂閱 queue），回傳 { stop } 用來優雅關機
+const startConsumer = async (queueName, handler, { prefetch = 10 } = {}) => {
   const channel = await getChannel()
   await declareWorkQueue(channel, queueName)
   await channel.prefetch(prefetch)
@@ -87,10 +92,36 @@ const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
   const putBack = (msg) => channel.nack(msg, false, true)
 
   channel.on('close', () => {
+    if (shuttingDown) return
     console.error(`[${queueName}] consumer 連線中斷，結束程序等待重啟`)
     process.exit(1)
   })
-  await channel.consume(queueName, async (msg) => {
+
+  const inFlight = new Set() // closing items, need to wait for them close.
+  const { consumerTag } = await channel.consume(
+    queueName,
+    (msg) => {
+      const done = handleMessage(msg).catch((err) =>
+        console.error(`[${queueName}] 未預期的錯誤：`, err),
+      )
+      inFlight.add(done)
+      done.finally(() => inFlight.delete(done))
+    },
+    { noAck: false },
+  )
+
+  return {
+    // 優雅關機：不再收新訊息 → 等處理中的訊息 ack → 先關 channel（確保 ack 送達）→ 關連線
+    stop: async () => {
+      shuttingDown = true
+      await channel.cancel(consumerTag)
+      await Promise.allSettled([...inFlight])
+      await channel.close().catch(() => {})
+      await closeConnection()
+    },
+  }
+
+  async function handleMessage(msg) {
     if (msg === null) return
 
     let payload
@@ -98,7 +129,7 @@ const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
       payload = JSON.parse(msg.content.toString())
     } catch (err) {
       console.error(
-        `[${queueName}] 訊息格式錯誤，送進 DLQ：`,
+        `[${queueName}] 訊息格式錯誤，送進 DLQ:`,
         msg.content.toString(),
       )
       toDlq(msg)
@@ -136,7 +167,13 @@ const consumeQueue = async (queueName, handler, { prefetch = 10 } = {}) => {
         putBack(msg)
       }
     }
-  })
+  }
 }
 
-module.exports = { enqueue, consumeQueue, PermanentError }
+// 優雅關機用：關閉整條連線（web 的 shutdown 也會呼叫）
+const closeConnection = async () => {
+  shuttingDown = true
+  if (currentConnection) await currentConnection.close().catch(() => {})
+}
+
+module.exports = { enqueue, startConsumer, closeConnection, PermanentError }

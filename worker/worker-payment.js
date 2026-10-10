@@ -1,25 +1,14 @@
-const { consumeQueue, PermanentError } = require('../que/queue')
+const mongoose = require('mongoose')
+const { PermanentError } = require('../que/queue')
 const User = require('../models/user')
 const Topup = require('../models/topup')
-
-// connect MongoDB
-require('dotenv').config()
-const mongoose = require('mongoose')
-mongoose.connect(process.env.MONGODB_URI)
-const db = mongoose.connection
-
-db.on('error', (err) => {
-  console.log(err)
-})
-db.once('open', () => {
-  console.log('mongoDB connected.')
-})
+const runWorker = require('./run-worker')
 
 const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-// 只處理 payload：JSON.parse 與 ack / nack 由 consumeQueue 負責
-// 不要在這裡 catch，錯誤丟出去 consumeQueue 才會 nack
+// 只處理 payload：JSON.parse 與 ack / nack 由 startConsumer 負責
+// 不要在這裡 catch，錯誤丟出去 startConsumer 才會 nack
 // topup and user currency sould be handle at once with transaction
 const processTopUp = async ({ topupId }) => {
   if (typeof topupId !== 'string')
@@ -59,4 +48,4 @@ const processTopUp = async ({ topupId }) => {
   }
 }
 
-consumeQueue('paymentQueue', processTopUp)
+runWorker('paymentWorker', 'paymentQueue', processTopUp)

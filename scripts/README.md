@@ -27,10 +27,10 @@ RabbitMQ 管理介面：http://localhost:15672（guest / guest），Queues 頁�
 
 所有腳本結果是 ❌ 時以 exit code 1 結束。
 
-一次跑完：`pnpm run repro:all --tag E1`（race、mixed、duplicate、invalid、poison；crash 等故障情境用 repro:chaos）。
+一次跑完：`pnpm run repro:all --tag E1`（race、mixed、duplicate、invalid、get、poison；crash 等故障情境用 repro:chaos）。
 會先檢查 web 和兩個 worker 有沒有在跑，結果同時寫進 `scripts/logs/<時間>_<tag>.log`（不進 git）。
 
-故障情境自動化：`pnpm run repro:chaos --tag E5`（crash、retry、broker-restart）。
+故障情境自動化：`pnpm run repro:chaos --tag E8`（crash、retry、graceful、broker-restart）。
 腳本會自己啟動／kill payment worker、停止再啟動 mongo、重啟 RabbitMQ，所以執行前要先停掉自己開的 payment worker；
 跑完 broker-restart 後 levelup worker 會斷線結束，要重新啟動。log 寫進 `scripts/logs/<時間>_<tag>_chaos.log`。
 

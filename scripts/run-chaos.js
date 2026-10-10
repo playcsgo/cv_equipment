@@ -218,7 +218,44 @@ async function brokerRestart() {
   return ok1 && ok2 && ok3
 }
 
-const SCENARIOS = { crash, retry, 'broker-restart': brokerRestart }
+// E8：處理途中收到 SIGTERM，worker 要先把手上的訊息處理完並 ack 才結束
+async function graceful() {
+  const N = 5
+  await startWorker({ WORKER_DELAY_MS: '3000' })
+  const cookie = await newGuest()
+  const before = await readState(cookie)
+
+  await Promise.all(Array.from({ length: N }, () => topup(cookie, 100)))
+  await waitFor(
+    'worker 拿走全部訊息',
+    async () => (await queueStats()).ready === 0,
+    5_000,
+  )
+
+  const start = Date.now()
+  const proc = worker
+  proc.kill('SIGTERM')
+  const code = await proc.exited
+  worker = null
+  const seconds = (Date.now() - start) / 1000
+  log(
+    `   送出 SIGTERM，worker 在 ${seconds.toFixed(1)} 秒後結束（exit ${code}）`,
+  )
+
+  const after = await readState(cookie)
+  const { ready } = await queueStats()
+  const ok1 = check('worker 正常結束（exit 0）', 0, code)
+  const ok2 = check('結束時 queue 裡沒有留下訊息', 0, ready)
+  const ok3 = check(
+    `結束前 ${N} 筆 × 100 全部入帳`,
+    before.currency + N * 100,
+    after.currency,
+  )
+  if (!(ok1 && ok2 && ok3)) log(`--- worker 輸出 ---\n${proc.output.trimEnd()}`)
+  return ok1 && ok2 && ok3
+}
+
+const SCENARIOS = { crash, retry, graceful, 'broker-restart': brokerRestart }
 
 // ---------- 主流程 ----------
 

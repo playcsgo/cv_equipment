@@ -17,6 +17,7 @@ const SCRIPTS = {
   mixed: 'race-mixed.js',
   duplicate: 'duplicate-topup.js',
   invalid: 'invalid-amount.js',
+  get: 'get-side-effect.js',
   poison: 'poison.js',
 }
 

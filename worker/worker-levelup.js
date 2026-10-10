@@ -1,18 +1,6 @@
-const { consumeQueue, PermanentError } = require('../que/queue')
 const User = require('../models/user')
-
-// connect MongoDB
-require('dotenv').config()
-const mongoose = require('mongoose')
-mongoose.connect(process.env.MONGODB_URI)
-const db = mongoose.connection
-
-db.on('error', (err) => {
-  console.log(err)
-})
-db.once('open', () => {
-  console.log('mongoDB connected.')
-})
+const { PermanentError } = require('../que/queue')
+const runWorker = require('./run-worker')
 
 const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -63,4 +51,4 @@ const processLevelUp = async ({ userId, location }) => {
 
 // consume = subscription
 // sub 'levelupQueue', and conduct call back 'processLevelUp'
-consumeQueue('levelupQueue', processLevelUp)
+runWorker('levelupWorker', 'levelupQueue', processLevelUp)
