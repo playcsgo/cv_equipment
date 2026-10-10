@@ -224,6 +224,18 @@ body.dark-mode #logContainer {
   transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
+/* 升級改成 <form> + <button>（POST）：讓 button 看起來和原本的連結一樣 */
+.gear-form {
+  margin: 0;
+}
+
+button.gear-btn {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+}
+
+
 .gear-btn:hover,
 .gear-btn:focus-visible {
   color: #fff8e1;

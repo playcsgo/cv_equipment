@@ -11,9 +11,12 @@
     <span class="gear-action">💎 not enough</span>
   </span>
 {{else}}
-  <a href="/gearup/{{ slot }}" class="gear-btn">
-    <i class="fa-solid {{ icon }} gear-icon"></i>
-    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
-    <span class="gear-action"><i class="fa-solid fa-arrow-up"></i> 💎500</span>
-  </a>
+  {{!-- 會改變資料的操作用 POST：GET 連結可能被預先載入、爬蟲、連結預覽意外觸發 --}}
+  <form action="/gearup/{{ slot }}" method="POST" class="gear-form">
+    <button type="submit" class="gear-btn">
+      <i class="fa-solid {{ icon }} gear-icon"></i>
+      <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
+      <span class="gear-action"><i class="fa-solid fa-arrow-up"></i> 💎500</span>
+    </button>
+  </form>
 {{/if}}

@@ -19,6 +19,7 @@
     "repro:invalid": "node scripts/invalid-amount.js",
     "dlq:replay": "node scripts/dlq-replay.js",
     "repro:latency": "node scripts/latency.js",
+    "repro:get": "node scripts/get-side-effect.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -5,7 +5,7 @@ const { enqueue } = require('../../que/queue')
 
 const LOCATIONS = ['reset', 'helmet_lv', 'armor_lv', 'weapon_lv']
 
-router.get('/:location', async (req, res) => {
+router.post('/:location', async (req, res) => {
   const user = req.user
   const location = req.params.location
   if (!LOCATIONS.includes(location)) {

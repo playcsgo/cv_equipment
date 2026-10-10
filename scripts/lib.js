@@ -42,7 +42,7 @@ function topup(cookie, amount, topupId = crypto.randomUUID()) {
 }
 
 function gearup(cookie, slot) {
-  return request(`/gearup/${slot}`, { headers: { cookie } })
+  return postForm(cookie, `/gearup/${slot}`, {})
 }
 
 async function readState(cookie) {

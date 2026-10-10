@@ -34,11 +34,13 @@
         {{> gearButton slot="helmet_lv" name="Helmet" icon="fa-helmet-safety" lv=user.helmet_lv currency=user.currency}}
         {{> gearButton slot="armor_lv" name="Armor" icon="fa-shield-halved" lv=user.armor_lv currency=user.currency}}
         {{> gearButton slot="weapon_lv" name="Weapon" icon="fa-hand-back-fist" lv=user.weapon_lv currency=user.currency}}
-        <a href="/gearup/reset" class="gear-btn gear-btn-reset">
-          <i class="fa-solid fa-feather-pointed gear-icon"></i>
-          <span class="gear-name">Reset</span>
-          <span class="gear-action">All to Lv 1</span>
-        </a>
+        <form action="/gearup/reset" method="POST" class="gear-form">
+          <button type="submit" class="gear-btn gear-btn-reset">
+            <i class="fa-solid fa-feather-pointed gear-icon"></i>
+            <span class="gear-name">Reset</span>
+            <span class="gear-action">All to Lv 1</span>
+          </button>
+        </form>
       </div>
     </div>
     {{!-- right half --}}
@@ -86,6 +88,9 @@
     }
 
     const gearEl = document.querySelector('[data-awaiting-gear]')
+    if (!gearEl && location.search.includes('gearFrom')) {
+      history.replaceState(null, '', '/') // 已經處理完了：清掉網址上的 ?gearFrom
+    }
     if (gearEl) {
       const before = gearEl.dataset.awaitingGear
       ;(async () => {
