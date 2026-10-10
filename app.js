@@ -9,6 +9,7 @@ const Redis = require('ioredis')
 const routes = require('./routes')
 const hbsHelpers = require('./hbsHelpers.js')
 const usePassport = require('./config/passport')
+const game = require('./config/game')
 const db = require('./config/mongoose')
 const { closeConnection } = require('./que/queue')
 
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
   res.locals.user = req.user
   res.locals.success_msg = req.flash('success_msg')
   res.locals.warning_msg = req.flash('warning_msg')
+  res.locals.game = game
   next()
 })
 

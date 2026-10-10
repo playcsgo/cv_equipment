@@ -1,13 +1,13 @@
-{{#if (gte lv 4)}}
-  <span class="gear-btn is-disabled" aria-disabled="true">
+{{#if (gte lv @root.game.MAX_LEVEL)}}
+  <span class="gear-btn is-max" aria-disabled="true" title="已達最高等級">
     <i class="fa-solid {{ icon }} gear-icon"></i>
-    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
-    <span class="gear-action">MAX</span>
+    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }}</small></span>
+    <span class="gear-action"><i class="fa-solid fa-crown"></i> MAX</span>
   </span>
-{{else if (lt currency 500)}}
+{{else if (lt currency @root.game.LEVEL_UP_COST)}}
   <span class="gear-btn is-disabled" aria-disabled="true" title="Not enough gems — top up first">
     <i class="fa-solid {{ icon }} gear-icon"></i>
-    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
+    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }}</small></span>
     <span class="gear-action">💎 not enough</span>
   </span>
 {{else}}
@@ -15,8 +15,8 @@
   <form action="/gearup/{{ slot }}" method="POST" class="gear-form">
     <button type="submit" class="gear-btn">
       <i class="fa-solid {{ icon }} gear-icon"></i>
-      <span class="gear-name">{{ name }} <small>Lv {{ lv }}/4</small></span>
-      <span class="gear-action"><i class="fa-solid fa-arrow-up"></i> 💎500</span>
+      <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }}</small></span>
+      <span class="gear-action"><i class="fa-solid fa-arrow-up"></i> 💎{{ @root.game.LEVEL_UP_COST }}</span>
     </button>
   </form>
 {{/if}}

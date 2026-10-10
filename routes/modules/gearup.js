@@ -3,7 +3,9 @@ const router = express.Router()
 // RabbitMQ
 const { enqueue } = require('../../que/queue')
 
-const LOCATIONS = ['reset', 'helmet_lv', 'armor_lv', 'weapon_lv']
+const { SLOTS } = require('../../config/game')
+
+const LOCATIONS = ['reset', ...SLOTS]
 
 router.post('/:location', async (req, res) => {
   const user = req.user

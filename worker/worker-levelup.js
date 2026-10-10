@@ -1,14 +1,10 @@
 const User = require('../models/user')
 const { PermanentError } = require('../que/queue')
 const runWorker = require('./run-worker')
+const { MAX_LEVEL, LEVEL_UP_COST, SLOTS } = require('../config/game')
 
 const WORKER_DELAY_MS = Number(process.env.WORKER_DELAY_MS || 0)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-
-// business logic
-const MAX_LEVEL = 4
-const LEVEL_UP_COST = 500
-const SLOTS = ['helmet_lv', 'armor_lv', 'weapon_lv']
 
 const processLevelUp = async ({ userId, location }) => {
   if (typeof userId !== 'string') throw new PermanentError('userId 必須是字串')

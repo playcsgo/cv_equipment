@@ -294,6 +294,21 @@ button.gear-btn {
   color: #aaa;
 }
 
+/* 滿級：金色外框＋MAX 徽章，和「錢不夠」的灰色停用區分開 */
+.gear-btn.is-max {
+  cursor: default;
+  border-color: #ffd54f;
+  background: linear-gradient(135deg, #3a2f12, #2a2418);
+  box-shadow: 0 0 10px rgba(255, 213, 79, 0.35);
+  transform: none;
+}
+
+.gear-btn.is-max .gear-action {
+  background: linear-gradient(135deg, #ffe082, #ffb300);
+  color: #3a2a00;
+  letter-spacing: 0.05em;
+}
+
 .gear-btn-reset {
   margin-top: 1rem;
   border-style: dashed;
