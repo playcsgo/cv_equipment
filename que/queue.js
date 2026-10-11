@@ -101,6 +101,13 @@ const startConsumer = async (queueName, handler, { prefetch = 10 } = {}) => {
   const { consumerTag } = await channel.consume(
     queueName,
     (msg) => {
+      // null: the server cancelled this consumer (e.g. queue deleted); exit so pm2 restarts and resubscribes
+      if (msg === null) {
+        if (shuttingDown) return
+        console.error(`[${queueName}] consumer 被伺服器取消，結束程序等待重啟`)
+        Promise.allSettled([...inFlight]).then(() => process.exit(1))
+        return
+      }
       const done = handleMessage(msg).catch((err) =>
         console.error(`[${queueName}] 未預期的錯誤：`, err),
       )
@@ -122,8 +129,6 @@ const startConsumer = async (queueName, handler, { prefetch = 10 } = {}) => {
   }
 
   async function handleMessage(msg) {
-    if (msg === null) return
-
     let payload
     try {
       payload = JSON.parse(msg.content.toString())
