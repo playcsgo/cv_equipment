@@ -19,7 +19,7 @@ RabbitMQ 管理介面：http://localhost:15672（guest / guest），Queues 頁�
 
 | 指令 | 內容 | 前提 |
 |---|---|---|
-| `pnpm run repro:all --tag F3` | race、mixed、duplicate、invalid、get、gear-duplicate、odds、gear-result、poison | web 和兩個 worker 都開著 |
+| `pnpm run repro:all --tag F3` | race、mixed、duplicate、invalid、get、gear-duplicate、odds、gear-result、rate-limit、rate-limit-sliding、poison | web 和兩個 worker 都開著 |
 | `pnpm run repro:chaos --tag E9` | crash、retry、graceful、broker-restart | **先停掉自己開的 payment worker**（腳本會自己啟動、kill）；broker-restart 後 levelup worker 會斷線結束，要重開 |
 
 兩者都會先檢查環境，結果寫進 `scripts/logs/<時間>_<tag>.log`（chaos 是 `_chaos.log`，不進 git）。

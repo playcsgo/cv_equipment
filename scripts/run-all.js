@@ -21,6 +21,8 @@ const SCRIPTS = {
   'gear-duplicate': 'gear-duplicate.js',
   odds: 'odds.js',
   'gear-result': 'gear-result.js',
+  'rate-limit': 'rate-limit.js',
+  'rate-limit-sliding': 'rate-limit-sliding.js',
   poison: 'poison.js',
 }
 

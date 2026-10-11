@@ -7,6 +7,7 @@ const flash = require('connect-flash')
 const RedisStore = require('connect-redis').default
 const Redis = require('ioredis')
 const routes = require('./routes')
+const rateLimit = require('./middleware/rateLimit')
 const hbsHelpers = require('./hbsHelpers.js')
 const usePassport = require('./config/passport')
 const game = require('./config/game')
@@ -70,6 +71,7 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use(['/topup', '/gearup'], rateLimit(redisClient))
 app.use(routes)
 const server = app.listen(PORT, () => {
   console.log(`server is running on http://localhost:${PORT}`)

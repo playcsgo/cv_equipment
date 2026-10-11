@@ -24,6 +24,8 @@
     "repro:gear-duplicate": "node scripts/gear-duplicate.js",
     "repro:odds": "node scripts/odds.js",
     "repro:gear-result": "node scripts/gear-result.js",
+    "repro:rate-limit": "node scripts/rate-limit.js",
+    "repro:rate-limit-sliding": "node scripts/rate-limit-sliding.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
