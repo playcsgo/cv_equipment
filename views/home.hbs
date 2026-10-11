@@ -26,6 +26,9 @@
           <i class="fa-solid fa-hand-pointer"></i>
           Click a gear below to upgrade it (💎 {{ game.LEVEL_UP_COST }} per try, max Lv {{ game.MAX_LEVEL }}；失敗也會扣寶石)
         </p>
+        <button type="button" class="fx-mute" aria-pressed="false">
+          <i class="fa-solid fa-volume-high"></i> <span>音效開</span>
+        </button>
         {{> gearButton slot="helmet_lv" name="Helmet" icon="fa-helmet-safety" lv=user.helmet_lv currency=user.currency}}
         {{> gearButton slot="armor_lv" name="Armor" icon="fa-shield-halved" lv=user.armor_lv currency=user.currency}}
         {{> gearButton slot="weapon_lv" name="Weapon" icon="fa-hand-back-fist" lv=user.weapon_lv currency=user.currency}}
@@ -64,7 +67,7 @@
   {{!-- bottom --}}
   <div class="my-5" id="logContainer"></div>
 </div>
-
+<script src="/javascripts/gear-fx.js"></script>
 <script>
   (() => {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -106,9 +109,26 @@
       if (action) action.textContent = text
     }
 
+    const muteBtn = document.querySelector('.fx-mute')
+    const renderMute = () => {
+      const muted = window.GearFx?.isMuted()
+      muteBtn.setAttribute('aria-pressed', String(muted))
+      muteBtn.querySelector('i').className = `fa-solid ${muted ? 'fa-volume-xmark' : 'fa-volume-high'}`
+      muteBtn.querySelector('span').textContent = muted ? '音效關' : '音效開'
+    }
+    if (muteBtn && window.GearFx) {
+      renderMute()
+      muteBtn.addEventListener('click', () => {
+        GearFx.setMuted(!GearFx.isMuted())
+        renderMute()
+      })
+    }
+
     document.querySelectorAll('form.gear-form').forEach((form) => {
       form.addEventListener('submit', async (event) => {
         event.preventDefault()
+        // 點擊當下就要解鎖音效（等輪詢回來才建立會被瀏覽器擋掉）
+        window.GearFx?.unlock()
         // one upgrade at a time: disable every button, the reload brings them back
         document.querySelectorAll('form.gear-form button').forEach((b) => (b.disabled = true))
         // a fresh idempotency key per click (the server-rendered one is the no-JS fallback)
@@ -126,7 +146,9 @@
             const { id } = await res.json()
             const result = await pollLevelup(id)
             showStatus(form, result ? RESULT_TEXT[result.result] : '處理時間較長，請稍後重新整理')
-            await sleep(600)
+            // 特效在重新整理之前播：重新整理後的新頁面沒有點擊，音效會被擋掉
+            const wait = result && window.GearFx ? GearFx.play(result, form.querySelector('button')) : 0
+            await sleep(Math.max(600, wait))
           }
           // on errors the server has already set a flash message, the reload shows it
         } finally {
