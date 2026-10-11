@@ -21,6 +21,7 @@ router.get('/', async (req, res, next) => {
     res.render('home', {
       user,
       topupId: crypto.randomUUID(), // 冪等鍵：同一個表單連點兩下會帶著同一個 id
+      levelupId: crypto.randomUUID(), // idempotency key for gear upgrades
       pendingTopups,
       pendingTopupIds: pendingTopups.map((t) => t._id).join(' '),
       awaitingGear:

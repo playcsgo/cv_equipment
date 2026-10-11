@@ -7,15 +7,17 @@
 {{else if (lt currency @root.game.LEVEL_UP_COST)}}
   <span class="gear-btn is-disabled" aria-disabled="true" title="Not enough gems — top up first">
     <i class="fa-solid {{ icon }} gear-icon"></i>
-    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }}</small></span>
+    <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }} · 成功率 {{ ratePercent lv }}%</small></span>
     <span class="gear-action">💎 not enough</span>
   </span>
 {{else}}
-  {{!-- 會改變資料的操作用 POST：GET 連結可能被預先載入、爬蟲、連結預覽意外觸發 --}}
+  {{!-- POST only: GET links can be triggered by prefetching, crawlers or link previews --}}
   <form action="/gearup/{{ slot }}" method="POST" class="gear-form">
+    {{!-- idempotency key: processing the same upgrade twice rolls once and charges once --}}
+    <input type="hidden" name="levelupId" value="{{ @root.levelupId }}">
     <button type="submit" class="gear-btn">
       <i class="fa-solid {{ icon }} gear-icon"></i>
-      <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }}</small></span>
+      <span class="gear-name">{{ name }} <small>Lv {{ lv }}/{{ @root.game.MAX_LEVEL }} · 成功率 {{ ratePercent lv }}%</small></span>
       <span class="gear-action"><i class="fa-solid fa-arrow-up"></i> 💎{{ @root.game.LEVEL_UP_COST }}</span>
     </button>
   </form>

@@ -18,6 +18,8 @@ const SCRIPTS = {
   duplicate: 'duplicate-topup.js',
   invalid: 'invalid-amount.js',
   get: 'get-side-effect.js',
+  'gear-duplicate': 'gear-duplicate.js',
+  odds: 'odds.js',
   poison: 'poison.js',
 }
 

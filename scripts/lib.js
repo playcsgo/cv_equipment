@@ -41,8 +41,8 @@ function topup(cookie, amount, topupId = crypto.randomUUID()) {
   return postForm(cookie, '/topup/', { amount: String(amount), topupId })
 }
 
-function gearup(cookie, slot) {
-  return postForm(cookie, `/gearup/${slot}`, {})
+function gearup(cookie, slot, levelupId = crypto.randomUUID()) {
+  return postForm(cookie, `/gearup/${slot}`, { levelupId })
 }
 
 async function readState(cookie) {
