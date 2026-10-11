@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const crypto = require('crypto')
 const Topup = require('../../models/topup')
+const { MAX_LEVEL, SLOTS } = require('../../config/game')
 
 router.get('/', async (req, res, next) => {
   try {
@@ -18,6 +19,7 @@ router.get('/', async (req, res, next) => {
       levelupId: crypto.randomUUID(),
       pendingTopups,
       pendingTopupIds: pendingTopups.map((t) => t._id).join(' '),
+      allMax: SLOTS.every((slot) => user[slot] >= MAX_LEVEL),
     })
   } catch (err) {
     next(err)

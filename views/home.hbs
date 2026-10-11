@@ -15,13 +15,16 @@
         <h3 class="balance align-items-center ">
           <i class="fa-regular fa-gem"></i> {{ user.currency }}
         </h3>
+        {{#if allMax}}
+          <p class="aura-banner"><i class="fa-solid fa-crown"></i> ALL MAX</p>
+        {{/if}}
         {{#if pendingTopups.length}}
           <p class="pending-note" data-pending-topups="{{ pendingTopupIds }}">
             <i class="fa-solid fa-spinner fa-spin"></i> 儲值處理中：{{#each pendingTopups}}+{{ this.amount }} {{/each}}
           </p>
         {{/if}}
       </div>
-      <div class="gear-panel">
+      <div class="gear-panel" data-max-level="{{ game.MAX_LEVEL }}">
         <p class="gear-hint">
           <i class="fa-solid fa-hand-pointer"></i>
           Click a gear below to upgrade it (💎 {{ game.LEVEL_UP_COST }} per try, max Lv {{ game.MAX_LEVEL }}；失敗也會扣寶石)
@@ -44,22 +47,49 @@
     </div>
     {{!-- right half --}}
     <div class="col-md-5 my-5">
-      <div class="relative-container">
+      {{!-- stage: positions and sizes in % --}}
+      <div class="relative-container{{#if allMax}} aura{{/if}}">
         <div class="puppet">
-        <img src="/image/puppet.png" alt=""
-        style="width: 500px; height: 500px;">
-      </div>
+          <div class="puppet-frame">
+            {{#if allMax}}
+              {{!-- flame aura --}}
+              <div class="aura-flames" aria-hidden="true">
+                <svg viewBox="-20 -50 240 300" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <filter id="aura-glow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+                      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                    </filter>
+                    <linearGradient id="aura-outer" x1="0" y1="1" x2="0" y2="0">
+                      <stop offset="0" stop-color="#ffb300" stop-opacity="0.15" />
+                      <stop offset="0.45" stop-color="#ffca28" stop-opacity="0.85" />
+                      <stop offset="1" stop-color="#ffe57f" stop-opacity="0.95" />
+                    </linearGradient>
+                    <radialGradient id="aura-inner" cx="0.5" cy="0.6" r="0.6">
+                      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95" />
+                      <stop offset="0.5" stop-color="#fff59d" stop-opacity="0.9" />
+                      <stop offset="1" stop-color="#ffd54f" stop-opacity="0.6" />
+                    </radialGradient>
+                  </defs>
+                  <g filter="url(#aura-glow)">
+                    <path class="flame flame-outer" d="M86.1 229.8 Q64.9 244.9 59.8 217.7 Q33.2 215.3 40.4 192.0 Q6.9 176.1 30.8 158.9 Q-8.3 122.2 35.0 124.2 Q4.8 50.4 50.3 95.3 Q28.2 -4.7 72.7 75.2 Q76.4 -36.5 100.0 63.9 Q124.0 -23.6 128.6 71.4 Q167.1 5.0 151.0 93.9 Q202.0 54.6 163.7 124.7 Q212.6 115.5 166.9 158.6 Q194.2 176.1 157.9 190.9 Q168.8 220.2 139.8 217.0 Q135.1 244.1 114.0 230.4 Q100.0 253.8 86.1 229.8Z" fill="url(#aura-outer)" />
+                    <path class="flame flame-outer flame-mirror" d="M86.1 229.8 Q64.9 244.9 59.8 217.7 Q33.2 215.3 40.4 192.0 Q6.9 176.1 30.8 158.9 Q-8.3 122.2 35.0 124.2 Q4.8 50.4 50.3 95.3 Q28.2 -4.7 72.7 75.2 Q76.4 -36.5 100.0 63.9 Q124.0 -23.6 128.6 71.4 Q167.1 5.0 151.0 93.9 Q202.0 54.6 163.7 124.7 Q212.6 115.5 166.9 158.6 Q194.2 176.1 157.9 190.9 Q168.8 220.2 139.8 217.0 Q135.1 244.1 114.0 230.4 Q100.0 253.8 86.1 229.8Z" fill="url(#aura-outer)" />
+                    <path class="flame flame-inner" d="M88.8 217.9 Q72.0 226.0 68.7 204.6 Q46.6 195.5 54.6 180.7 Q31.9 152.8 51.4 150.2 Q25.4 92.4 61.4 122.8 Q44.9 32.8 78.4 103.7 Q77.5 -3.9 100.0 93.4 Q121.0 14.3 121.6 103.6 Q157.4 45.1 138.3 123.1 Q175.9 104.1 146.9 150.5 Q168.8 146.6 143.8 179.9 Q153.3 198.9 130.9 204.1 Q128.3 226.3 111.4 219.3 Q100.0 235.9 88.8 217.9Z" fill="url(#aura-inner)" />
+                  </g>
+                </svg>
+              </div>
+            {{/if}}
+            <img src="/image/puppet.png" alt="">
+          </div>
+        </div>
       <div class="helmet">
-        <img src="/image/helmet_{{ user.helmet_lv }}.png" alt=""
-        style="width: 200px; height: 200px; opacity: 0.9; z-index: 3; position: relative;">
+        <img src="/image/helmet_{{ user.helmet_lv }}.png" alt="">
       </div>
       <div class="armor">
-        <img src="/image/armor_{{ user.armor_lv }}.png" alt=""
-        style="width: 300px; height: 300px; opacity: 0.9; z-index: 3; position: relative;">
+        <img src="/image/armor_{{ user.armor_lv }}.png" alt="">
       </div>
       <div class="weapon">
-        <img src="/image/weapon_{{ user.weapon_lv }}.png" alt=""
-        style="width: 200px; height: 200px; opacity: 0.9; z-index: 3; position: relative;">
+        <img src="/image/weapon_{{ user.weapon_lv }}.png" alt="">
       </div>
     </div>
       </div>
@@ -109,6 +139,14 @@
       if (action) action.textContent = text
     }
 
+    const auraEl = document.querySelector('.relative-container.aura')
+    try {
+      if (auraEl && sessionStorage.getItem('aura-burst')) {
+        sessionStorage.removeItem('aura-burst')
+        auraEl.classList.add('aura-burst')
+      }
+    } catch {}
+
     const muteBtn = document.querySelector('.fx-mute')
     const renderMute = () => {
       const muted = window.GearFx?.isMuted()
@@ -147,7 +185,18 @@
             const result = await pollLevelup(id)
             showStatus(form, result ? RESULT_TEXT[result.result] : '處理時間較長，請稍後重新整理')
             // 特效在重新整理之前播：重新整理後的新頁面沒有點擊，音效會被擋掉
-            const wait = result && window.GearFx ? GearFx.play(result, form.querySelector('button')) : 0
+            const maxLevel = Number(document.querySelector('.gear-panel')?.dataset.maxLevel)
+            // this upgrade just maxed the last slot
+            const justAllMax =
+              result?.result === 'success' &&
+              result.toLv >= maxLevel &&
+              document.querySelectorAll('.gear-btn.is-max').length === 2
+            if (justAllMax) {
+              try {
+                sessionStorage.setItem('aura-burst', '1')
+              } catch {}
+            }
+            const wait = result && window.GearFx ? GearFx.play(result, form.querySelector('button'), { allMax: justAllMax }) : 0
             await sleep(Math.max(600, wait))
           }
           // on errors the server has already set a flash message, the reload shows it

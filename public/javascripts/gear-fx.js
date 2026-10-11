@@ -56,6 +56,11 @@
       tone(233.08, 0.14, 0.28, 'square', 0.07)
     },
     rejected: () => tone(196, 0, 0.15, 'sine', 0.12),
+    // all max: longer rising run
+    allMax: () =>
+      [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98].forEach((f, i) =>
+        tone(f, i * 0.08, 0.32, 'triangle', 0.16),
+      ),
     reset: () =>
       [784, 659.25, 523.25].forEach((f, i) =>
         tone(f, i * 0.05, 0.12, 'sine', 0.1),
@@ -102,7 +107,7 @@
   }
 
   // 播放一次升級結果的特效；回傳建議等幾毫秒再重新整理（讓動畫播完）
-  const play = ({ result, slot }, button) => {
+  const play = ({ result, slot }, button, { allMax = false } = {}) => {
     const gearEl = document.querySelector(GEAR_SELECTOR[slot])
     const img = gearEl?.querySelector('img')
     if (result === 'success') {
@@ -116,8 +121,12 @@
     } else if (result === 'rejected') {
       animate(button, 'fx-btn-fail')
     }
-    playSound(result)
-    return result === 'success' || result === 'fail' ? 1000 : 500
+    playSound(allMax ? 'allMax' : result)
+    return allMax
+      ? 1400
+      : result === 'success' || result === 'fail'
+        ? 1000
+        : 500
   }
 
   window.GearFx = { unlock, play, playSound, isMuted, setMuted }
