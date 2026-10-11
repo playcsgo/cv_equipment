@@ -3,9 +3,6 @@ const router = express.Router()
 const crypto = require('crypto')
 const Topup = require('../../models/topup')
 
-const stateKey = (u) =>
-  `${u.currency}-${u.helmet_lv}-${u.armor_lv}-${u.weapon_lv}`
-
 router.get('/', async (req, res, next) => {
   try {
     const user = req.user
@@ -14,28 +11,17 @@ router.get('/', async (req, res, next) => {
       { userId: user._id, status: 'pending' },
       'amount',
     ).lean()
-    // 升級沒有獨立的狀態紀錄：gearup 會把「送出前的狀態」帶在網址上，
-    // 目前狀態跟它一樣，代表 worker 還沒處理完
-    const gearFrom =
-      typeof req.query.gearFrom === 'string' ? req.query.gearFrom : null
     res.render('home', {
       user,
       topupId: crypto.randomUUID(), // 冪等鍵：同一個表單連點兩下會帶著同一個 id
-      levelupId: crypto.randomUUID(), // idempotency key for gear upgrades
+      // idempotency key for gear upgrades: the page replaces it on every click, this one is the no-JS fallback
+      levelupId: crypto.randomUUID(),
       pendingTopups,
       pendingTopupIds: pendingTopups.map((t) => t._id).join(' '),
-      awaitingGear:
-        gearFrom !== null && gearFrom === stateKey(user) ? gearFrom : null,
     })
   } catch (err) {
     next(err)
   }
-})
-
-// 給前端輪詢用：目前的餘額與等級
-router.get('/state', (req, res) => {
-  const { currency, helmet_lv, armor_lv, weapon_lv } = req.user
-  res.json({ currency, helmet_lv, armor_lv, weapon_lv })
 })
 
 module.exports = router

@@ -20,11 +20,6 @@
             <i class="fa-solid fa-spinner fa-spin"></i> 儲值處理中：{{#each pendingTopups}}+{{ this.amount }} {{/each}}
           </p>
         {{/if}}
-        {{#if awaitingGear}}
-          <p class="pending-note" data-awaiting-gear="{{ awaitingGear }}">
-            <i class="fa-solid fa-spinner fa-spin"></i> 升級處理中…
-          </p>
-        {{/if}}
       </div>
       <div class="gear-panel">
         <p class="gear-hint">
@@ -35,6 +30,7 @@
         {{> gearButton slot="armor_lv" name="Armor" icon="fa-shield-halved" lv=user.armor_lv currency=user.currency}}
         {{> gearButton slot="weapon_lv" name="Weapon" icon="fa-hand-back-fist" lv=user.weapon_lv currency=user.currency}}
         <form action="/gearup/reset" method="POST" class="gear-form">
+          <input type="hidden" name="levelupId" value="{{ levelupId }}">
           <button type="submit" class="gear-btn gear-btn-reset">
             <i class="fa-solid fa-feather-pointed gear-icon"></i>
             <span class="gear-name">Reset</span>
@@ -87,20 +83,56 @@
       })()
     }
 
-    const gearEl = document.querySelector('[data-awaiting-gear]')
-    if (!gearEl && location.search.includes('gearFrom')) {
-      history.replaceState(null, '', '/') // 已經處理完了：清掉網址上的 ?gearFrom
+    // gear upgrade: submit with fetch, poll this attempt's record until done, then reload.
+    // success and fail both mark the record done, so a failed roll stops polling right away.
+    // without JS the form submits normally and the server redirects
+    const pollLevelup = async (id) => {
+      for (let i = 0; i < 40; i++) {
+        await sleep(250)
+        const r = await getJSON(`/gearup/${id}`)
+        if (r && r.status === 'done') return r
+      }
+      return null // not done after 10 seconds (e.g. the worker is not running)
     }
-    if (gearEl) {
-      const before = gearEl.dataset.awaitingGear
-      ;(async () => {
-        for (let i = 0; i < 10; i++) {
-          await sleep(500)
-          const s = await getJSON('/state')
-          if (s && `${s.currency}-${s.helmet_lv}-${s.armor_lv}-${s.weapon_lv}` !== before) break
+
+    const RESULT_TEXT = {
+      success: '升級成功！',
+      fail: '升級失敗…',
+      rejected: '無法升級',
+      reset: '已重置',
+    }
+    const showStatus = (form, text) => {
+      const action = form.querySelector('.gear-action')
+      if (action) action.textContent = text
+    }
+
+    document.querySelectorAll('form.gear-form').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault()
+        // one upgrade at a time: disable every button, the reload brings them back
+        document.querySelectorAll('form.gear-form button').forEach((b) => (b.disabled = true))
+        // a fresh idempotency key per click (the server-rendered one is the no-JS fallback)
+        const idInput = form.querySelector('[name="levelupId"]')
+        if (window.crypto?.randomUUID) idInput.value = crypto.randomUUID()
+        showStatus(form, '處理中…')
+
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: new URLSearchParams(new FormData(form)),
+          })
+          if (res.ok) {
+            const { id } = await res.json()
+            const result = await pollLevelup(id)
+            showStatus(form, result ? RESULT_TEXT[result.result] : '處理時間較長，請稍後重新整理')
+            await sleep(600)
+          }
+          // on errors the server has already set a flash message, the reload shows it
+        } finally {
+          location.reload()
         }
-        location.replace('/')
-      })()
-    }
+      })
+    })
   })()
 </script>

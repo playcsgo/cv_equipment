@@ -20,6 +20,7 @@ const SCRIPTS = {
   get: 'get-side-effect.js',
   'gear-duplicate': 'gear-duplicate.js',
   odds: 'odds.js',
+  'gear-result': 'gear-result.js',
   poison: 'poison.js',
 }
 

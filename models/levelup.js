@@ -8,10 +8,11 @@ const levelupSchema = new Schema(
   {
     _id: { type: String, required: true },
     userId: { type: Schema.Types.ObjectId, required: true },
-    slot: { type: String, required: true },
+    slot: { type: String, required: true }, // helmet_lv / armor_lv / weapon_lv / reset
     status: { type: String, enum: ['pending', 'done'], default: 'pending' },
-    // success: upgraded, fail: charged but not upgraded, rejected: not enough gems or max level (not charged)
-    result: { type: String, enum: ['success', 'fail', 'rejected'] },
+    // success: upgraded, fail: charged but not upgraded, rejected: not enough gems or max level (not charged),
+    // reset: every slot back to Lv 1
+    result: { type: String, enum: ['success', 'fail', 'rejected', 'reset'] },
     fromLv: Number,
     toLv: Number,
     createdAt: { type: Date, default: Date.now, expires: 3600 }, // demo data expires after an hour

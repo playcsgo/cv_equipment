@@ -23,6 +23,7 @@
     "repro:graceful": "node scripts/graceful-shutdown.js",
     "repro:gear-duplicate": "node scripts/gear-duplicate.js",
     "repro:odds": "node scripts/odds.js",
+    "repro:gear-result": "node scripts/gear-result.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
