@@ -32,7 +32,7 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": ">=20"
+    "node": "26.x"
   },
   "packageManager": "pnpm@12.5.1",
   "dependencies": {

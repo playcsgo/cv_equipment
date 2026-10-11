@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: corepack enable && pnpm install --frozen-lockfile
-    startCommand: pnpm start
+    buildCommand: npx --yes pnpm@12.5.1 install --frozen-lockfile
+    startCommand: ./node_modules/.bin/pm2-runtime ecosystem.config.js --env production
     healthCheckPath: /readyz
     envVars:
       - key: NODE_ENV
